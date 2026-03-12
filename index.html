@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UQ INFS4205/7205 - A3: Personalised Multimodal Chatbot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=VT323&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --beige-light: #F0EDE0;
+            --beige-main: #E0DCCF;
+            --beige-dark: #C4C0B3;
+            --beige-shadow: #A09C8F;
+            --screen-black: #222529;
+            --screen-glow: #3E434C;
+            --crt-green: #33ff00;
+            --accent-blue: #2B6CB0;
+            --accent-orange: #C05621;
+            --ink-black: #0f0f0f;
+            --font-serif: 'EB Garamond', serif;
+            --font-mono: 'VT323', monospace;
+        }
+
+        @font-face {
+            font-family: 'RetroSerif';
+            src: local('Apple Garamond'), local('Garamond'), local('Times New Roman');
+        }
+
+        @font-face {
+            font-family: 'RetroMono';
+            src: local('Courier New'), local('Courier'), monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: #f4f1e6;
+            font-family: 'RetroSerif', var(--font-serif);
+            color: var(--ink-black);
+            min-height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            display: block;
+        }
+
+        .hero-wrapper {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .main-container {
+            position: relative;
+            width: 100%;
+            max-width: 1400px;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            align-items: center;
+            padding: 4rem;
+        }
+
+        .content-col {
+            padding-right: 2rem;
+            z-index: 10;
+            padding-left: 4rem;
+        }
+
+        .product-col {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 2000px;
+            height: 100%;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 5rem;
+            line-height: 0.85;
+            margin: 0 0 2rem 0;
+            letter-spacing: -2px;
+            font-weight: 500;
+        }
+
+        h1 span {
+            display: block;
+        }
+
+        h1 .italic {
+            font-style: italic;
+            font-family: 'RetroSerif', var(--font-serif);
+            white-space: nowrap;
+            margin-left: -4px;
+        }
+
+        p.lead {
+            font-size: 1.5rem;
+            line-height: 1.3;
+            margin-bottom: 2.5rem;
+            max-width: 480px;
+            font-family: 'RetroSerif', var(--font-serif);
+            letter-spacing: -0.5px;
+            color: #444;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--ink-black);
+            color: #f4f1e6;
+            padding: 1rem 2rem;
+            font-size: 1.25rem;
+            text-decoration: none;
+            border-radius: 8px;
+            font-family: 'RetroSerif', var(--font-serif);
+            border: 2px solid var(--ink-black);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: transparent;
+            color: var(--ink-black);
+        }
+
+        .price-tag {
+            font-family: 'RetroMono', var(--font-mono);
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .specs-grid {
+            margin-top: 4rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 400px;
+        }
+
+        .spec-item h4 {
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .spec-item p {
+            margin: 0.5rem 0 0 0;
+            font-family: 'RetroMono', var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        /* 3D Scene Styles */
+        .scene {
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateY(-15deg) rotateX(5deg);
+            transition: transform 0.5s ease-out;
+        }
+
+        .product-col:hover .scene {
+            transform: rotateY(-5deg) rotateX(2deg);
+        }
+
+        .computer-unit {
+            position: relative;
+            width: 360px;
+            height: 440px;
+            transform-style: preserve-3d;
+        }
+
+        .face {
+            position: absolute;
+            background: var(--beige-main);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .front {
+            width: 360px;
+            height: 440px;
+            transform: translateZ(100px);
+            background: linear-gradient(135deg, var(--beige-light) 0%, var(--beige-main) 100%);
+            border-radius: 0;
+            box-shadow:
+                inset 2px 2px 5px rgba(255, 255, 255, 0.8),
+                inset -5px -5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+        }
+
+        .back {
+            width: 360px;
+            height: 440px;
+            transform: translateZ(-100px) rotateY(180deg);
+            background: var(--beige-dark);
+            border-radius: 0;
+        }
+
+        .left {
+            width: 200px;
+            height: 440px;
+            transform: rotateY(-90deg) translateZ(100px);
+            background: var(--beige-main);
+            border-radius: 0;
+            box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .right {
+            width: 200px;
+            height: 440px;
+            transform: rotateY(90deg) translateZ(260px);
+            background: var(--beige-dark);
+            border-radius: 0;
+            box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .top {
+            width: 360px;
+            height: 200px;
+            transform: rotateX(90deg) translateZ(100px);
+            background: var(--beige-light);
+            border-radius: 0;
+        }
+
+        .bottom {
+            width: 360px;
+            height: 200px;
+            transform: rotateX(-90deg) translateZ(340px);
+            background: var(--beige-shadow);
+            border-radius: 0;
+            box-shadow: 0 50px 80px rgba(0, 0, 0, 0.3);
+        }
+
+        .screen-inset {
+            width: 280px;
+            height: 220px;
+            background: #D1CEC7;
+            border-radius: 16px;
+            box-shadow:
+                inset 2px 2px 8px rgba(0, 0, 0, 0.2),
+                inset -2px -2px 8px rgba(255, 255, 255, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .crt {
+            width: 260px;
+            height: 200px;
+            background: var(--screen-black);
+            border-radius: 40% 40% 40% 40% / 10% 10% 10% 10%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 1);
+        }
+
+        .crt::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            z-index: 5;
+            pointer-events: none;
+            border-radius: 12px;
+        }
+
+        .crt-glow {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            background: transparent;
+            border-radius: 12px;
+            z-index: 2;
+            color: #fff;
+            font-family: var(--font-mono);
+            padding: 15px;
+            font-size: 14px;
+            text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .floppy-slot {
+            width: 140px;
+            height: 12px;
+            background: #333;
+            border-radius: 6px;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.5);
+            margin-left: 100px;
+            position: relative;
+        }
+
+        .logo-badge {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 20px;
+            height: 26px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            background: linear-gradient(180deg, #63B548 0%, #63B548 16.6%, #F6C829 16.6%, #F6C829 33.3%, #E57D25 33.3%, #E57D25 50%, #D83335 50%, #D83335 66.6%, #9C4595 66.6%, #9C4595 83.3%, #468CCF 83.3%, #468CCF 100%);
+            box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .logo-badge::before {
+            content: "";
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 7px;
+            background: #5a3e28;
+            border-radius: 1px;
+        }
+
+        .sticker {
+            position: absolute;
+            z-index: 5;
+            box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            transform-style: flat;
+        }
+
+        .sticker-ball {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-orange);
+            border-radius: 50%;
+            bottom: 88px;
+            left: 20px;
+            background-image:
+                radial-gradient(circle at 10px 10px, rgba(255, 255, 255, 0.2) 2px, transparent 3px),
+                linear-gradient(45deg, transparent 40%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.2) 45%, transparent 45%);
+            transform: translateZ(101px) rotate(-10deg);
+        }
+
+        .sticker-star {
+            width: 45px;
+            height: 45px;
+            background: #fff;
+            border-radius: 8px;
+            bottom: 98px;
+            left: 50px;
+            transform: translateZ(102px) rotate(15deg);
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sticker-star::after {
+            content: '★';
+            color: var(--accent-blue);
+            font-size: 24px;
+        }
+
+        .sticker-text {
+            width: 60px;
+            height: 30px;
+            background: #8B0000;
+            color: #F0E68C;
+            font-family: 'Courier New', courier, monospace;
+            font-size: 6px;
+            line-height: 1.3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            bottom: 64px;
+            left: 100px;
+            transform: translateZ(101px) rotate(-2deg);
+            box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .grill {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            width: 30px;
+            height: 20px;
+        }
+
+        .vent {
+            background: #333;
+            border-radius: 1px;
+            box-shadow: inset 1px 1px 1px rgba(0, 0, 0, 0.5);
+        }
+
+        .keyboard-assembly {
+            position: absolute;
+            width: 360px;
+            height: 140px;
+            bottom: -118px;
+            transform-style: preserve-3d;
+            transform-origin: top center;
+            --kb-angle: 66deg;
+            transform: translateZ(164px) rotateX(var(--kb-angle));
+            --kb-thickness: 18px;
+        }
+
+        .kb-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--beige-main);
+            border-radius: 0;
+            box-shadow:
+                inset 1px 1px 2px rgba(255, 255, 255, 0.5),
+                inset -5px -5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateZ(calc(var(--kb-thickness) / 2));
+            overflow: hidden;
+        }
+
+        .kb-front,
+        .kb-back {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: var(--kb-thickness);
+        }
+
+        .kb-front {
+            bottom: 0;
+            background: linear-gradient(180deg, #cdc9bb 0%, #b5b1a3 100%);
+            transform-origin: bottom center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateX(90deg);
+            border-radius: 0;
+        }
+
+        .kb-back {
+            top: 0;
+            background: linear-gradient(180deg, #e5e1d4 0%, #c9c5b8 100%);
+            transform-origin: top center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateX(-90deg);
+            border-radius: 0;
+        }
+
+        .kb-left,
+        .kb-right {
+            position: absolute;
+            top: 0;
+            width: var(--kb-thickness);
+            height: 100%;
+            background: linear-gradient(180deg, #d1cdbf 0%, #b7b3a6 100%);
+        }
+
+        .kb-left {
+            left: 0;
+            transform-origin: left center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateY(90deg);
+            border-radius: 0;
+        }
+
+        .kb-right {
+            right: 0;
+            transform-origin: right center;
+            transform: translateZ(calc(var(--kb-thickness) / 2)) rotateY(-90deg);
+            border-radius: 0;
+        }
+
+        .kb-shadow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: transparent;
+            transform-origin: top center;
+            transform: rotateX(calc(-90deg - var(--kb-angle))) translateZ(20px);
+            box-shadow:
+                0 40px 70px rgba(0, 0, 0, 0.25),
+                0 20px 30px rgba(0, 0, 0, 0.15);
+            pointer-events: none;
+            border-radius: 12px;
+        }
+
+        .keys-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 6px;
+            padding: 15px;
+            transform: translateZ(8px);
+            transform-style: preserve-3d;
+        }
+
+        .key {
+            height: 27px;
+            background: #ECE8DA;
+            border-radius: 4px;
+            box-shadow:
+                0 6px 0 #C4C0B3,
+                0 8px 7px rgba(0, 0, 0, 0.2);
+            transform: translateZ(1px);
+            transition: transform 0.05s;
+        }
+
+        .key.wide {
+            grid-column: span 2;
+        }
+
+        .key.space {
+            grid-column: span 6;
+        }
+
+        @keyframes typeKey {
+
+            0%,
+            100% {
+                transform: translateZ(1px) translateY(0);
+                box-shadow: 0 6px 0 #C4C0B3, 0 8px 7px rgba(0, 0, 0, 0.2);
+            }
+
+            50% {
+                transform: translateZ(-2px) translateY(5px);
+                box-shadow: 0 1px 0 #C4C0B3, 0 1px 2px rgba(0, 0, 0, 0.05);
+            }
+        }
+
+        .key:nth-child(3n+1) {
+            animation: typeKey 1.5s infinite 0.2s;
+        }
+
+        .key:nth-child(7n) {
+            animation: typeKey 2.1s infinite 0.5s;
+        }
+
+        .key:nth-child(2n+4) {
+            animation: typeKey 1.8s infinite 0.9s;
+        }
+
+        .key:nth-child(5n) {
+            animation: typeKey 2.5s infinite 1.2s;
+        }
+
+        .key:nth-child(4n+2) {
+            animation: typeKey 1.2s infinite 0s;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 15px;
+            background: #fff;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        .crt-ui {
+            display: flex;
+            height: 100%;
+        }
+
+        .sidebar {
+            width: 30%;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            font-size: 10px;
+            color: #ccc;
+        }
+
+        .main-area {
+            flex: 1;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .window {
+            background: #fff;
+            color: #000;
+            border-radius: 2px;
+            padding: 5px;
+            margin-top: 10px;
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+            font-family: var(--font-mono);
+            font-size: 10px;
+        }
+
+        .window-header {
+            border-bottom: 1px dotted #000;
+            margin-bottom: 5px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .icon-list div {
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-circle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #555;
+        }
+
+        .icon-circle.blue {
+            background: #468CCF;
+        }
+
+        .icon-circle.orange {
+            background: #E57D25;
+        }
+
+        .typing-container {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            line-height: 1.2;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        /* Tasksheet Content Styles */
+        .tasks-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 4rem 6rem;
+            font-size: 1.25rem;
+            line-height: 1.6;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tasks-container h2 {
+            font-size: 2.8rem;
+            margin: 4rem 0 1.5rem;
+            border-bottom: 3px solid var(--ink-black);
+            padding-bottom: 0.5rem;
+            font-weight: 600;
+            letter-spacing: -1px;
+            font-family: 'RetroSerif', var(--font-serif);
+        }
+
+        .tasks-container h3 {
+            font-size: 1.8rem;
+            margin: 0 0 1rem;
+            font-weight: 600;
+            font-family: 'RetroSerif', var(--font-serif);
+        }
+
+        .task-card {
+            background: var(--beige-main);
+            border: 2px solid var(--ink-black);
+            padding: 2.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 6px 6px 0 var(--ink-black);
+        }
+
+        .task-card p {
+            margin-bottom: 1.5rem;
+        }
+
+        .task-card p:last-child {
+            margin-bottom: 0;
+        }
+
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .task-grid .task-card {
+            margin-bottom: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .task-card ul {
+            margin-left: 2rem;
+            margin-top: 1rem;
+        }
+
+        .task-card li {
+            margin-bottom: 0.8rem;
+        }
+
+        .example-box {
+            background: var(--screen-glow);
+            color: var(--crt-green);
+            font-family: 'RetroMono', var(--font-mono);
+            padding: 1.2rem;
+            border-radius: 6px;
+            margin-top: auto;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+            font-size: 1.1rem;
+            border: 2px solid var(--ink-black);
+        }
+
+        .task-grid .task-card .example-box {
+            margin-top: 1rem;
+        }
+
+        .badge-mark {
+            background: var(--accent-orange);
+            color: #fff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-family: 'RetroMono', var(--font-mono);
+            font-size: 1.1rem;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 1rem;
+            border: 2px solid var(--ink-black);
+            box-shadow: 2px 2px 0 var(--ink-black);
+        }
+
+        .query-item {
+            margin-bottom: 2rem;
+        }
+
+        .query-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .query-item h3 {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+            border: 2px solid var(--ink-black);
+            background: var(--beige-main);
+            box-shadow: 6px 6px 0 var(--ink-black);
+        }
+
+        th,
+        td {
+            padding: 1.2rem;
+            border: 1px solid var(--ink-black);
+            text-align: left;
+        }
+
+        th {
+            background: var(--ink-black);
+            color: var(--beige-light);
+            font-family: 'RetroMono', var(--font-mono);
+            font-size: 1.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            font-weight: 500;
+        }
+
+        details {
+            background: var(--beige-main);
+            border: 2px solid var(--ink-black);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 3rem;
+            box-shadow: 6px 6px 0 var(--ink-black);
+            cursor: pointer;
+        }
+
+        summary {
+            font-weight: bold;
+            font-size: 1.6rem;
+            outline: none;
+            font-family: 'RetroSerif', var(--font-serif);
+        }
+
+        summary:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Rubric Styles */
+        .rubric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .rubric-card {
+            background: var(--beige-main);
+            border: 2px solid var(--ink-black);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 6px 6px 0 var(--ink-black);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rubric-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0 var(--ink-black);
+        }
+
+        .rubric-header {
+            background: var(--ink-black);
+            color: var(--beige-light);
+            padding: 1.2rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--ink-black);
+        }
+
+        .rubric-title {
+            font-family: 'RetroSerif', var(--font-serif);
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .rubric-total {
+            font-family: 'RetroMono', var(--font-mono);
+            font-size: 1.4rem;
+            color: var(--crt-green);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.8rem;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .rubric-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .rubric-criterion {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .rubric-criterion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .rubric-mark {
+            font-family: 'RetroMono', var(--font-mono);
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--ink-black);
+            background: var(--beige-light);
+            border: 1px solid var(--ink-black);
+            box-shadow: 2px 2px 0 var(--ink-black);
+            padding: 0.1rem 0.6rem;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+
+        .rubric-desc {
+            font-size: 1.15rem;
+            margin: 0;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .rubric-req-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            color: #666;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        @media (max-width: 1000px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr;
+                padding: 2rem;
+                height: auto;
+            }
+
+            .content-col {
+                padding: 0;
+                margin-bottom: 3rem;
+                text-align: center;
+            }
+
+            .hero-wrapper {
+                align-items: flex-start;
+                padding-top: 4rem;
+                min-height: auto;
+            }
+
+            .cta-group {
+                justify-content: center;
+            }
+
+            .specs-grid {
+                margin: 3rem auto 0;
+            }
+
+            .scene {
+                transform: scale(0.8) rotateY(-15deg) rotateX(5deg);
+            }
+
+            .tasks-container {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="hero-wrapper">
+        <div class="main-container">
+            <!-- Left Content Column -->
+            <div class="content-col">
+                <div
+                    style="font-family: 'RetroMono', var(--font-mono); color: var(--accent-orange); font-size: 2.5rem; font-weight: bold; margin-bottom: 0.5rem; letter-spacing: 1px;">
+                    UQ INFS4205/7205 - A3:</div>
+                <h1>
+                    <span>Personalised</span>
+                    <span class="italic">Multimodal Chatbot.</span>
+                </h1>
+                <p class="lead">
+                    Build an intelligent agent backed by your own multimodal knowledge base. Utilise LangGraph and
+                    Large Language Models (LLMs) to produce reliable, grounded, and domain-specific answers.
+                </p>
+
+                <div class="cta-group">
+                    <a href="#details" class="btn">View Requirements</a>
+                    <div class="price-tag" style="color: var(--accent-orange)">20 Marks</div>
+                </div>
+
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <h4>Framework</h4>
+                        <p>LangGraph Agent</p>
+                    </div>
+                    <div class="spec-item">
+                        <h4>Knowledge Base</h4>
+                        <p>Text + Media</p>
+                    </div>
+                    <div class="spec-item">
+                        <h4>Retrieval</h4>
+                        <p>Vector DB + Metadata</p>
+                    </div>
+                    <div class="spec-item">
+                        <h4>Inference</h4>
+                        <p>LLM (Ollama / API)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Product Column (3D Computer) -->
+            <div class="product-col">
+                <div class="scene" id="scene">
+                    <div class="computer-unit">
+                        <!-- Unit Faces -->
+                        <div class="face front">
+                            <div class="screen-inset">
+                                <div class="crt">
+                                    <div class="crt-glow">
+                                        <div class="crt-ui">
+                                            <div class="sidebar">
+                                                <div class="icon-list">
+                                                    <div><span class="icon-circle blue"></span> System</div>
+                                                    <div><span class="icon-circle orange"></span> Memory</div>
+                                                    <div><span class="icon-circle"></span> Index</div>
+                                                    <div><span class="icon-circle"></span> Generate</div>
+                                                    <!-- Deliberate retro typo styling -->
+                                                    <div><span class="icon-circle"></span> Think</div>
+                                                </div>
+                                            </div>
+                                            <div class="main-area">
+                                                <div style="font-size: 10px; margin-bottom: 4px; opacity: 0.7;">
+                                                    LangGraph v0.1</div>
+                                                <div class="window">
+                                                    <div class="window-header">
+                                                        <span>Agent_Trace.log</span>
+                                                        <span>[x]</span>
+                                                    </div>
+                                                    <div class="typing-container">
+                                                        <span id="typewriter"></span><span class="cursor"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="logo-badge"></div>
+                            <div class="floppy-slot"></div>
+
+                            <!-- Stickers -->
+                            <div class="sticker sticker-ball"></div>
+                            <div class="sticker sticker-star"></div>
+                            <div class="sticker sticker-text">MACHINE<br>INTELLIGENCE</div>
+
+                            <div class="grill">
+                                <div class="vent"></div>
+                                <div class="vent"></div>
+                                <div class="vent"></div>
+                                <div class="vent"></div>
+                                <div class="vent"></div>
+                                <div class="vent"></div>
+                                <div class="vent"></div>
+                                <div class="vent"></div>
+                            </div>
+                        </div>
+                        <div class="face back"></div>
+                        <div class="face left"></div>
+                        <div class="face right"></div>
+                        <div class="face top"></div>
+                        <div class="face bottom"></div>
+
+                        <!-- Keyboard -->
+                        <div class="keyboard-assembly">
+                            <div class="kb-base">
+                                <div class="keys-grid">
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+
+                                    <div class="key wide"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key wide"></div>
+
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key space"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                    <div class="key"></div>
+                                </div>
+                            </div>
+                            <div class="kb-front"></div>
+                            <div class="kb-back"></div>
+                            <div class="kb-left"></div>
+                            <div class="kb-right"></div>
+                            <div class="kb-shadow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Section -->
+    <div id="details" class="tasks-container">
+        <h2>Project Overview</h2>
+        <div class="task-card">
+            <p>
+                Large Language Models can generate fluent responses but lack reliable access to external knowledge.
+                On the otherhand, Retrieval-Augmented Generation (RAG) integrates external knowledge sources to produce
+                grounded
+                answers.
+            </p>
+            <p>
+                In this project you will design and implement a
+                <strong style="margin-top: 1.5rem; font-style: bold; color: var(--accent-orange);">Personalised
+                    Multimodal
+                    Chatbot</strong> that retrieves information from a custom knowledge base containing multiple
+                modalities (text, images,
+                or
+                other media).
+            </p>
+            <p>The system must focus on:</p>
+            <ul>
+                <li>Multimodal knowledge indexing</li>
+                <li>Retrieval design</li>
+                <li>LangGraph agent orchestration</li>
+                <li>Evaluation of query effectiveness</li>
+            </ul>
+            <p style="margin-top: 1.5rem; font-style: italic; color: var(--accent-orange);">
+                Note: User interface design is <strong>not the focus</strong> of this project.
+            </p>
+        </div>
+
+        <h2>Task Requirements</h2>
+        <div class="task-card">
+            <ul>
+                <li>A multimodal chatbot backed by a personal knowledge base (Any data of your choice)</li>
+                <li>LangGraph + LLM (Ollama or API)</li>
+                <li><strong style="color: var(--accent-orange);">At least two data modalities</strong> (e.g., text +
+                    images)</li>
+                <li>Implementation of vector indexing (VectorDB)</li>
+                <li>Evaluation of retrieval performance (Test and Case Studies). Critically compare the performance of
+                    the LLM with and without the customised Agent pipeline.
+                </li>
+
+                <li><strong style="color: var(--accent-orange);">At least 4 queries of different types and
+                        complexity</strong>
+                    (e.g., Simple: text query, image query; Complex: analytical query,
+                    conversational query, deep-research, advance-tool usage). Each query is worth 1 point. See below
+                    detailed rubric for more
+                    examples.</li>
+            </ul>
+        </div>
+
+        <h2>Example Chatbot Scenarios</h2>
+        <p style="font-size: 1.4rem; margin-bottom: 2rem; font-family: 'RetroSerif', serif;">
+            Students may design their chatbot around any domain. The following examples illustrate possible directions.
+        </p>
+
+        <div class="task-grid">
+            <div class="task-card">
+                <h3>Research Paper Assistant</h3>
+                <p>Assume you have access to an academic paper database, and you indexes the research papers and
+                    figures.</p>
+                <div class="example-box">"What papers discuss large language models?"</div>
+                <div class="example-box">"Show diagrams related to transformers."</div>
+            </div>
+
+            <div class="task-card">
+                <h3>Recipe Knowledge Assistant</h3>
+                <p>Indexes recipes and food images.</p>
+                <div class="example-box">"Find recipes containing chicken and mushrooms."</div>
+                <div class="example-box">"Identify this dish from an image."</div>
+            </div>
+
+            <div class="task-card">
+                <h3>Travel Guide Chatbot</h3>
+                <p>Indexes travel locations and landmark images.</p>
+                <div class="example-box">"What attractions are located in Kyoto? Show me some photos."</div>
+                <div class="example-box">"What building is shown in this photo?"</div>
+            </div>
+
+            <div class="task-card">
+                <h3>Product Knowledge Chatbot</h3>
+                <p>Indexes product catalogues and specifications.</p>
+                <div class="example-box">"Find laptops with at least 16GB RAM."</div>
+                <div class="example-box">"Identify this product from an image."</div>
+            </div>
+
+            <div class="task-card">
+                <h3>Movie & TV Show Navigator</h3>
+                <p>Indexes film plots, cast details, and movie posters.</p>
+                <div class="example-box">"Recommend sci-fi movies directed by Nolan."</div>
+                <div class="example-box">"What movie is this still from?"</div>
+            </div>
+
+            <div class="task-card">
+                <h3>E-commerce Fashion Stylist</h3>
+                <p>Indexes clothing items, outfit inspirations, and style tags.</p>
+                <div class="example-box">"Find winter jackets under $100."</div>
+                <div class="example-box">"Find some shoes that match this dress, show me how they look."</div>
+            </div>
+        </div>
+
+
+        <!-- <h2>Implementation Requirements</h2>
+        <div class="task-card">
+            <ul>
+                <li>Use LangGraph for the agent workflow</li>
+                <li>Use an LLM backend (Ollama or API)</li>
+                <li>Use a vector database (e.g., FAISS, Chroma)</li>
+                <li>Index multimodal data</li>
+                <li>Implement at least three query tasks</li>
+                <li>Evaluate retrieval performance</li>
+            </ul>
+        </div> -->
+
+        <h2>Marking Summary (20 marks)</h2>
+        <table>
+            <tr>
+                <th>Component</th>
+                <th>Marks</th>
+            </tr>
+            <tr>
+                <td>Knowledge Base Construction</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>Multimodal Indexing</td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td>Query Tasks</td>
+                <td>4</td>
+            </tr>
+            <tr>
+                <td>LangGraph Agent Pipeline</td>
+                <td>2</td>
+            </tr>
+            <tr>
+                <td>Report Presentation</td>
+                <td>6</td>
+            </tr>
+            <tr>
+                <td>Documentation</td>
+                <td>2</td>
+            </tr>
+        </table>
+
+        <!-- <h2>Required Query Tasks</h2>
+        <div class="task-card">
+            <div class="query-item">
+                <h3>Query 1 – Knowledge Retrieval <span class="badge-mark">1.5 marks</span></h3>
+                <p>A text query retrieves relevant documents and generates a grounded answer.</p>
+            </div>
+            <hr style="border: none; border-top: 2px dashed var(--ink-black); margin: 2rem 0;">
+
+            <div class="query-item">
+                <h3>Query 2 – Multimodal Retrieval <span class="badge-mark">1.5 marks</span></h3>
+                <p>The chatbot must support image-based or cross-modal queries (beyond text).</p>
+            </div>
+            <hr style="border: none; border-top: 2px dashed var(--ink-black); margin: 2rem 0;">
+
+            <div class="query-item">
+                <h3>Query 3 – Analytical Synthesis <span class="badge-mark">0.5 marks</span></h3>
+                <p>The system must answer queries that require retrieving context from multiple different documents or
+                    modalities to synthesise a complex response.</p>
+            </div>
+            <hr style="border: none; border-top: 2px dashed var(--ink-black); margin: 2rem 0;">
+
+            <div class="query-item">
+                <h3>Query 4 – Conversational Memory <span class="badge-mark">0.5 marks</span></h3>
+                <p>The system must support sequential follow-up queries, maintaining situational awareness of the
+                    conversation history.</p>
+            </div>
+        </div> -->
+
+        <h2>Detailed Rubric</h2>
+        <div class="rubric-grid">
+
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <h3 class="rubric-title">Knowledge Base</h3>
+                    <div class="rubric-total">2 Marks</div>
+                </div>
+                <div class="rubric-body">
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Data Integration</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Collects and integrates a dataset containing at least two distinct data
+                            modalities (e.g., text and images) into a structured format. The dataset size should not be
+                            too small (e.g., more than 10000 samples).</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Preprocessing</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Clearly and thoroughly documents the data preprocessing pipeline.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <h3 class="rubric-title">Multimodal Indexing</h3>
+                    <div class="rubric-total">4 Marks</div>
+                </div>
+                <div class="rubric-body">
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Vector Store Base</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Successfully sets up and populates a vector database with your selected
+                            dataset.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Embeddings</span>
+                            <span class="rubric-mark">1.5</span>
+                        </div>
+                        <p class="rubric-desc">Generates and handles multimodal embeddings correctly (e.g., using CLIP
+                            for images/text alignment, or combining separate embeddings effectively).</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Strategy Comparison</span>
+                            <span class="rubric-mark">1.5</span>
+                        </div>
+                        <p class="rubric-desc">Compares at least two indexing strategies and justifies the
+                            final architectural choice with evidence.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <h3 class="rubric-title">Example Query Tasks</h3>
+                    <div class="rubric-total">4 Marks</div>
+                </div>
+                <div class="rubric-body">
+                    <p
+                        style="font-size: 0.95rem; color: #555; text-align: center; margin-bottom: 0.5rem; font-style: italic; line-height: 1.3;">
+                        Note: These are just examples. You can perform whatever query is suitable for your domain, each
+                        worth 1 point. However, you <strong>must</strong> demonstrate the usage of your agent and its
+                        tools.</p>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Text Query</span>
+                            <span class="rubric-mark">1</span>
+                        </div>
+                        <p class="rubric-desc">Reliably
+                            retrieving relevant context and generating a grounded text response.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Multimodal Query</span>
+                            <span class="rubric-mark">1</span>
+                        </div>
+                        <p class="rubric-desc">Supporting
+                            cross-modal capabilities (e.g., text-to-image search, image-to-text retrieval).</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Analytical Synthesis</span>
+                            <span class="rubric-mark">1</span>
+                        </div>
+                        <p class="rubric-desc"> Retrieving
+                            context from multiple distinct sources to form a comparative or synthesised answer.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Conversational Memory</span>
+                            <span class="rubric-mark">1</span>
+                        </div>
+                        <p class="rubric-desc"> Allows the agent to correctly retain and
+                            reference the prior context or media over sequential follow-up questions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <h3 class="rubric-title">Agent Pipeline</h3>
+                    <div class="rubric-total">2 Marks</div>
+                </div>
+                <div class="rubric-body">
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Workflow Execution</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Implements a functional, stateful workflow using LangGraph to orchestrate
+                            the retrieval and generation tools.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Tool Selection</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Implements more than 3 tools for different functionalities related to the
+                            chosen task, and the agent correctly selects the best tools for the query.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <h3 class="rubric-title">Report</h3>
+                    <div class="rubric-total">6 Marks</div>
+                </div>
+                <div class="rubric-body">
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Introduction</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Clearly outlines the chatbot's domain, target use case, and overall
+                            structure.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Methodology</span>
+                            <span class="rubric-mark">2.0</span>
+                        </div>
+                        <p class="rubric-desc">Provides a detailed explanation of the system architecture, embedding
+                            choices, chunking strategies, and the LangGraph workflow.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Results & Evaluation</span>
+                            <span class="rubric-mark">2.0</span>
+                        </div>
+                        <p class="rubric-desc">Includes clear case studies of successful and failed queries, critically
+                            evaluating the retrieval accuracy and response quality. You must identify how a standard LLM
+                            (without an agent pipeline) would fail to perform the task.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Clarity</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Presentation is well-structured, with appropriate use of diagrams/tables,
+                            and proper citations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <h3 class="rubric-title">Documentation & Code</h3>
+                    <div class="rubric-total">2 Marks</div>
+                </div>
+                <div class="rubric-body">
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Usability</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Provides a clear, step-by-step README file explaining how to set up the
+                            environment, seed the database, and run the chatbot.</p>
+                    </div>
+                    <div class="rubric-criterion">
+                        <div class="rubric-criterion-header">
+                            <span class="rubric-req-label">Code Quality</span>
+                            <span class="rubric-mark">1.0</span>
+                        </div>
+                        <p class="rubric-desc">Code is modular, easily readable, follows best practices, and includes
+                            appropriate comments describing complex logic.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div style="text-align: center; margin-top: 4rem; margin-bottom: 2rem;">
+            <p style="margin-bottom: 0.5rem;">
+                Team: <span style="font-weight: bold;">Danny Wang</span><sup>*</sup>, Yadan Luo<sup>†</sup>,
+                Zhuoxiao Chen, Yan Jiang, Xiangyu Sun, Xuwei Xu, Fengyi Zhang, Zhizhen Zhang.
+            </p>
+            <p style="font-size: 0.9rem; opacity: 0.7;">
+                * Project Credit, † Coordinator.
+            </p>
+            <p style="font-size: 0.9rem; opacity: 0.7;">
+                This content is created based on
+                publicly available sources. All original copyrights remain with their respective
+                owners.
+                <br>
+                &copy; 2026 INFS4205/7205. The University of Queensland.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const textStr = "UQ INFS4205/7205 - A3:\nPersonalised Multimodal Chatbot.\n------------------------\nSystem initialized.\nLoading LangGraph agent...\nConnecting to Vector DB...\nReady: Awaiting user query.";
+        const typeSpeed = 40;
+        let charIndex = 0;
+        const targetElement = document.getElementById("typewriter");
+
+        function typeWriterEffect() {
+            if (charIndex < textStr.length) {
+                targetElement.innerHTML += textStr.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriterEffect, typeSpeed + (Math.random() * 30));
+            } else {
+                setTimeout(() => {
+                    targetElement.innerHTML = "";
+                    charIndex = 0;
+                    typeWriterEffect();
+                }, 3000);
+            }
+        }
+
+        window.onload = typeWriterEffect;
+    </script>
+</body>
+
+</html>
